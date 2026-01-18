@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  mcp-server:
+    image: capcut-api-mcp:latest
+    build: .
+    ports:
+      - "5001:5001"
+    volumes:
+      - ./downloads:/app/downloads
+      - ./uploads:/app/uploads
+      - ./temp:/app/temp
+      # 挂载代码以便热重载或无需重建镜像
+      - ./mcp_server.py:/app/mcp_server.py
+      - ./mcp_server_sse.py:/app/mcp_server_sse.py
+    environment:
+      - PYTHONPATH=/app
+      - PYTHONUNBUFFERED=1
+    # 覆盖启动命令，运行 SSE 版本
+    command: python mcp_server_sse.py
+    restart: unless-stopped
+    networks:
+      - mcp-network
+
+networks:
+  mcp-network:
+    driver: bridge
